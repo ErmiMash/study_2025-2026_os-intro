@@ -58,86 +58,74 @@ monofontoptions: Scale=MatchLowercase,Scale=0.9
 
 ## Цели и задачи
 
-Целью данной лабораторной работы является настройка рабочей среды. 
-
-##Теоретическое введение
-
-Менеджер паролей pass — программа, сделанная в рамках идеологии Unix. Также носит название стандартного менеджера паролей для Unix (The standard Unix password manager).
-
-Основные свойства:
- - Данные хранятся в файловой системе в виде каталогов и файлов.
- - Файлы шифруются с помощью GPG-ключа.
- 
+Целью данной лабораторной работы является получение навыков управления системными службами операционной системы посредством systemd.
 
 # Выполнение лабораторной работы
 
-## Менеджер паролей pass
-Для начала мы устанавливаем pass и gopass в нашей виртуальной машине. Делаем это с помощью следующих команд
-:
- - dnf install pass pass-otp
- - dnf install gopass
-![Установка менеджера](image/l5_1.jpg){#fig:001 width=70%}
+## Управление сервисами
+Для начала получите права администратора. После проверьте статус службы Very Secure FTP:
+  - systemctl status vsftpd
+Установите службу Very Secure FTP:
+  - dnf -y install vsftpd
+Запустите службу Very Secure FTP и проверьте ее статус:
+  - systemctl start vsftpd
+  - systemctl status vsftpd
 
-## Настройка pass.
-Первым шагом проверяем ключ GPG. Синхронизируем структуру с git. 
-Вручную закоммитим и выложим изменения:
-   - cd ~/.password-store/
-   - git add .
-   - git commit -am 'edit manually'
-   - git push
-   - pass git status (проверяем статус синхронизации)
-![Синхронизация с git](image/l5_3.jpg){#fig:003 width=70%}
+![Служба VSFTP](image/image1.jpg){#fig:001 width=70%}
 
-## Настройка интерфейса с броузером
-Устанавливаем программу, обеспечивающую интерфейс native messaging, с помощью команд:
- - dnf copr enable maximbaz/browserpass
- - dnf install browserpass
-После устанавливаем плагин.
- ![Установка программы](image/l5_4.jpg){#fig:004 width=70%}
+## Very Secure FTP
+Выведите на экран символические ссылки, ответственные за запуск различных сервисов:
+  - ls /etc/systemd/system/multi-user.target.wants
+Снова добавьте службу Very Secure FTP в автозапуск:
+  - systemctl enable vsftpd
+Снова проверьте статус службы Very Secure FTP:
+  - systemctl status vsftpd
+Выведите на экран список зависимостей юнита:
+  - systemctl list-dependencies vsftpd
+Выведите на экран список юнитов, которые зависят от данного юнита:
+  - systemctl list-dependencies vsftpd --reverse
   
-## Сохранение пароля
-Для начала добавляем новый пароль с помощью команды pass insert pass.txt. До этого создаём сам файл pass.txt.
-Отображаем наш пароль, после чего заменяем его. Делаем это с помощью следующих команд:
- - pass pass.txt
- - pass generate --in-place pass.txt
-![Сохранение пароля](image/l5_6.jpg){#fig:006 width=70%}
+![Автозапуск](image/image2.jpg){#fig:002 width=70%}
 
-## Управление файлами конфигурации
-sudo dnf -y install \
-       dunst \
-       fontawesome-fonts \
-       powerline-fonts \
-       light \
-       fuzzel \
-       swaylock \
-       kitty \
-       waybar swaybg \
-       wl-clipboard \
-       mpv \
-       grim \
-       slurp
-![Установка доп. прог. обеспеч.](image/l5_7.jpg){#fig:007 width=70%}
+## firewalld и iptables
+Попробуйте запустить firewalld и iptables:
+  - systemctl start firewalld
+  - systemctl start iptables
+Введите для проверки настроек юнита: (рис. [-@fig:003])
+  - cat /usr/lib/systemd/system/firewalld.service
+  - cat /usr/lib/systemd/system/iptables.service
 
-## Устанавливаем шрифты
- - sudo dnf copr enable peterwu/iosevka
- - sudo dnf search iosevka
- - sudo dnf install iosevka-fonts iosevka-aile-fonts iosevka-curly-fonts iosevka-slab-fonts iosevka-etoile-fonts iosevka-term-fonts
-![Установка шрифтов](image/l5_8.jpg){#fig:008 width=70%}
+![Настройки юнитов](image/image3.jpg){#fig:003 width=70%}
+  
+## iptables
+Заблокируйте запуск iptables, введя:
+  - systemctl mask iptables
+Попробуйте запустить iptables:
+  - systemctl start iptables
+Попробуйте добавить iptables в автозапуск:
+  - systemctl enable iptables
 
-## Установка бинарного файла и создание собственного репозитория с помощью утилит
-Будем использовать утилиты командной строки для работы с github. Создадим свой репозиторий для конфигурационных файлов на основе шаблона. Инициализируем chezmoi с репозиторием dotfiles и проверяем, какие изменения внесёт chezmoi в домашний каталог. После проверяем, какие изменения внесёт chezmoi в домашний каталог (chezmoi diff), и, если они нас устраивают, запускаем chezmoi apply -v.
-![Проверка изменений](image/l5_10.jpg){#fig:010 width=70%}
+![iptables](image/image4.jpg){#fig:004 width=70%}
 
-## Использование chezmoi на нескольких машинах
-Воспользуеммся второй виртуальной машиной. На второй машине инициализируйте chezmoi с вашим репозиторием dotfiles.
-После этого так же проверяем, какие изменения внесёт chezmoi в домашний каталог (chezmoi diff), и, если они нас устраивают, запускаем chezmoi apply -v. Можно установить свои dotfiles на новый компьютер с помощью одной команды.
-![Настройка каталогов](image/l5_12.jpg){#fig:012 width=70%}![Настройка каталогов](image/l5_12.jpg){#fig:012 width=70%}
+## Изолируемые цели
+Получите полномочия администратора. Перейдите в каталог systemd и найдите список всех целей, которые можно изолировать:
+  - cd /usr/lib/systemd/system
+  - grep Isolate *.target
+Переключите операционную систему в режим восстановления:
+  - systemctl isolate rescue.target 
+Перезапустите операционную систему следующим образом:
+  - systemctl isolate reboot.target
 
-## Ежедневные операции c chezmoi
-Извлекаем последние изменения из репозитория и примените их с помощью команды chezmoi update. Извлекаем последние изменения из своего репозитория и посмотрите, что изменится, фактически не применяя изменения: chezmoi git pull -- --autostash --rebase && chezmoi diff. 
-Автоматически фиксируем и отправляем изменения в репозиторий - функцию нужно подключить, так как она отключена по умолчанию.
-![Работа с репозиторием](image/l5_12.jpg){#fig:012 width=70%}
+![Настройки ОС](image/image5.jpg){#fig:005 width=70%}
+
+## Цель по умолчанию
+Для запуска по умолчанию текстового режима введите
+  - systemctl set-default multi-user.target
+Перегрузите систему командой reboot. Убедитесь, что система загрузилась в текстовом режиме. Получите полномочия администратора. Для запуска по умолчанию графического режима введите
+  - systemctl set-default graphical.target
+
+![Изменения виды ОС](image/image6.jpg){#fig:006 width=70%}
 
 ## Результаты
 
-В ходе данной лабораторной работы получила навыки настройки рабочей среды. 
+В ходе данной лабораторной работы получены навыков управления системными службами операционной системы посредством systemd. 
