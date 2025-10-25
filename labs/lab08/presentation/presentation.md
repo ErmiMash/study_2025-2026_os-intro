@@ -1,7 +1,7 @@
 ---
 ## Front matter
 lang: ru-RU
-title: Лабораторная работа №
+title: Лабораторная работа №8
 subtitle: Презентация
 author:
   - Ермишина М. К.
@@ -66,25 +66,39 @@ monofontoptions: Scale=MatchLowercase,Scale=0.9
 Получив полномочия администратора Посмотрите статус демона crond. Посмотрите содержимое файла конфигурации /etc/crontab, а после посмотрите список заданий в расписании - ничего не отобразится, так как расписание ещё не задано:
   - systemctl status crond -l
   - cat /etc/crontab
-  - crontab -l
-  - crontab -e
-![Списки заданий](image/image1.png){#fig:001 width=70%}
+  - crontab -l	 - crontab -e
+![Списки заданий](image/image1.png){#fig:001 width=50%}
+
+## Первый текстовый файл
+Добавьте следующую строку в файл расписания:
+  - */1 * * * * logger This message is written from root cron
+![Текст в первом файле](image/image2.png){#fig:002 width=50%}
 
 ## eachhour
 Перейдите в каталог /etc/cron.hourly и создайте в нём файл сценария с именем eachhour:
   - cd /etc/cron.hourly
   - touch eachhour
+![Вывод сообщения и создание 2х файлов](image/image3.png){#fig:003 width=50%}
+
+## Текст в другом текстовой файле
+Откройте файл eachhour для редактирования и пропишите в нём следующий скрипт:
+  - #!/bin/sh
+  - logger This message is written at $(date)
 Сделайте файл сценария eachhour исполняемым: 
   - chmod +x eachhour
-![Текст в третьем файле](image/image5.png){#fig:005 width=70%}
+![Текст в третьем файле](image/image5.png){#fig:005 width=50%}
 
-## /etc/crond.d
+## /etc/rsyslog.d
 В каталоге /etc/rsyslog.d создайте файл с расписанием eachhour: 
-  - cd /etc/cron.d
-  - touch eachhour
+  - cd /etc/cron.d	 - touch eachhour
+Откройте этот файл для редактирования и поместите в него следующее содержимое:
+  - 11 * * * * root logger This message is written from /etc/cron.d
+![Текст в четвертом файле](image/image6.png){#fig:006 width=50%}
+
+## Вывод следующего сообщения
 Не выключая систему, через некоторое время (2–3 часа):
   - grep written /var/log/messages
-![Вывод сообщения в течение 3х часов](image/image7.png){#fig:007 width=70%}
+![Вывод сообщения в течение 3х часов](image/image7.png){#fig:007 width=50%}
 
 ## Планирование заданий с помощью at
 Проверьте, что служба atd загружена и включена:
@@ -93,7 +107,7 @@ monofontoptions: Scale=MatchLowercase,Scale=0.9
   - at 9:30	- logger message from at
 А после убедитесь, что задание действительно запланировано:
   - atq
-![Вывод сообщения в указанное время](image/image8.png){#fig:008 width=70%}
+![Вывод сообщения в указанное время](image/image8.png){#fig:008 width=50%}
 
 ## Результаты
 
